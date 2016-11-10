@@ -63,7 +63,7 @@ class ServerThread(threading.Thread):
 					# if it is a valid HTTP request
 					if request[0]=='GET' and request[2]=='HTTP/1.1':
 							contents = ""
-							with open('TMGD.html','r') as file:
+							with open('TMGD.html','rb') as file:
 								for line in file:
 									contents+=line
 							content=headerWriter(len(contents),'text/html')
@@ -80,7 +80,7 @@ class ServerThread(threading.Thread):
 						break
 
 				else:
-					raise error('CLinet disconnected')
+					raise error('client disconnected')
 			except:
 				self.client.close()
 				break
