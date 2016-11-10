@@ -64,29 +64,32 @@ class ServerThread(threading.Thread):
 					
 					# if it is a valid HTTP request
 					if request[0]=='GET' and request[2]=='HTTP/1.1':
-
-						if path[-1]=='' or path[0]=='TMDG.html':
+						if request[1]=='/' or request[1]=='/TMDG.html':
 							root='TMDG.html'
 							filetype='text/html'
 						else:
-							root='TMGD_files/'+path[-1]
-							if path[-1][-2]=='p':
+							root=request[1][1:]
+							if request[1][-2]=='p':
 								filetype='image/jpg'
-							elif path[-1][-2]=='n':
+							elif request[1][-2]=='n':
 								filetype='image/png'
-							elif path[-1][-2]=='j':
+							elif request[1][-2]=='j':
 								filetype='text/javascript'
-							elif path[-1][-2]=='m':
+							elif request[1][-2]=='m':
 								filetype='text/html'
-
-						print 'path',root	
-						print filetype	
+							elif request[1][-2]=='i':
+								filetype='image/gif'
+							else:
+								self.client.send('HTTP/1.1 404 Not Found\r\n')
+								self.client.close()
+								break
+						print 'root',root
+						print 'filetype',filetype
 						header=headerWriter(os.stat(root).st_size,filetype)
 						
 								
 						self.client.send(header)
 						with open(root,'rb') as file:
-							print '===============opened'
 							for line in file:
 								self.client.send(line)
 						self.client.close()
