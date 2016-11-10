@@ -25,8 +25,46 @@ class Server:
 			c=ServerThread(self.sock.accept())
 			c.daemon=True
 			c.run()
-			#c.join()
+			# client,address=self.sock.accept()
+			# try:
+			# 	data = client.recv(1024)
+				
+			# 	if data:
+			# 		print data
+			# 		msg=string.split(data,'\r\n')
+			# 		# print 'first line: '+str(msg[0])
+			# 		request=string.split(msg[0],' ')
+			# 		# print 'request: '+str(request)
 
+			# 		# if it is a valid HTTP request
+			# 		if request[0]=='GET' and request[2]=='HTTP/1.1':
+			# 				contents = ""
+			# 				with open('TMGD.html','r') as file:
+			# 					for line in file:
+			# 						contents+=line
+			# 				sizestr=str(len(contents))
+			# 				# print 'size',sizestr
+			# 				# print 'request[1]',str(request[1])
+			# 				content='HTTP/1.1 200 OK\r\n'
+			# 				content+='Content-Type: text/html; charset=UTF-8\r\n'
+			# 				content+='Content-Length: '+sizestr+'\r\n\r\n'
+			# 				client.send(content)
+			# 				print content
+			# 				client.send(contents)
+			# 				client.close()
+			# 				# print('after ', i)
+			# 				break
+
+			# 		else:
+			# 			client.send('HTTP/1.1 404 Not Found\r\n\r\n')
+			# 			client.close()
+			# 			break	
+
+			# 	else:
+			# 		raise error('CLinet disconnected')
+			# except:
+			# 	client.close()
+			# 	break
 
 class ServerThread(threading.Thread):
 	def __init__(self,(client,address)):
@@ -41,20 +79,27 @@ class ServerThread(threading.Thread):
 				data = self.client.recv(self.size)
 				
 				if data:
+					print data
 					msg=string.split(data,'\r\n')
-					print 'first line: '+str(msg[0])
+					# print 'first line: '+str(msg[0])
 					request=string.split(msg[0],' ')
-					print 'request: '+str(request)
+					# print 'request: '+str(request)
 
 					# if it is a valid HTTP request
 					if request[0]=='GET' and request[2]=='HTTP/1.1':
-							content = ""
+							contents = ""
 							with open('TMGD.html','r') as file:
 								for line in file:
-									content+= line
-							content = 'HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: 57969\r\n\r\n' + content
-							# self.client.send(
+									contents+=line
+							sizestr=str(len(contents))
+							# print 'size',sizestr
+							# print 'request[1]',str(request[1])
+							content='HTTP/1.1 200 OK\r\n'
+							content+='Content-Type: text/html; charset=UTF-8\r\n'
+							content+='Content-Length: '+sizestr+'\r\n\r\n'
 							self.client.send(content)
+							print content
+							self.client.send(contents)
 							self.client.close()
 							# print('after ', i)
 							break
