@@ -3,14 +3,13 @@ import socket
 import threading
 import time
 import string
-import errno
+import select
 
 class Server:
 	def __init__(self,port):
 		self.host=''
 		self.port=port
-		
-	def run(self):
+	def opensocket(self):
 		try:
 			self.sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			print "Binding socket on port "+str(port)
@@ -20,57 +19,33 @@ class Server:
 			if self.sock:
 				self.sock.close()
 			sys.exit()
+
+	def run(self):
+		self.opensocket()
 		self.sock.listen(50)
+		input = [self.sock]
 		while True:
-			c=ServerThread(self.sock.accept())
-			c.daemon=True
-			c.run()
-			# client,address=self.sock.accept()
-			# try:
-			# 	data = client.recv(1024)
-				
-			# 	if data:
-			# 		print data
-			# 		msg=string.split(data,'\r\n')
-			# 		# print 'first line: '+str(msg[0])
-			# 		request=string.split(msg[0],' ')
-			# 		# print 'request: '+str(request)
+			inputready,outputready,exceptready=select.select(input,[],[]) 
+			for s in inputready:
+				if s==self.sock:
+					c=ServerThread(self.sock.accept())
+					c.daemon=True
+					c.start()
 
-			# 		# if it is a valid HTTP request
-			# 		if request[0]=='GET' and request[2]=='HTTP/1.1':
-			# 				contents = ""
-			# 				with open('TMGD.html','r') as file:
-			# 					for line in file:
-			# 						contents+=line
-			# 				sizestr=str(len(contents))
-			# 				# print 'size',sizestr
-			# 				# print 'request[1]',str(request[1])
-			# 				content='HTTP/1.1 200 OK\r\n'
-			# 				content+='Content-Type: text/html; charset=UTF-8\r\n'
-			# 				content+='Content-Length: '+sizestr+'\r\n\r\n'
-			# 				client.send(content)
-			# 				print content
-			# 				client.send(contents)
-			# 				client.close()
-			# 				# print('after ', i)
-			# 				break
+		self.sock.close()
 
-			# 		else:
-			# 			client.send('HTTP/1.1 404 Not Found\r\n\r\n')
-			# 			client.close()
-			# 			break	
-
-			# 	else:
-			# 		raise error('CLinet disconnected')
-			# except:
-			# 	client.close()
-			# 	break
+def headerWriter(filesize,type):
+	sizestr=str(filesize)
+	header='HTTP/1.1 200 OK\r\n'
+	header+='Content-Type: '+type+' charset=UTF-8\r\n'
+	header+='Content-Length: '+sizestr+'\r\n\r\n'
+	return header
 
 class ServerThread(threading.Thread):
 	def __init__(self,(client,address)):
 		threading.Thread.__init__(self)
-		self.client=client
 		print "Client address is"+str(address)
+		self.client=client
 		self.address=address
 		self.size=1024
 	def run(self):
@@ -91,23 +66,18 @@ class ServerThread(threading.Thread):
 							with open('TMGD.html','r') as file:
 								for line in file:
 									contents+=line
-							sizestr=str(len(contents))
-							# print 'size',sizestr
-							# print 'request[1]',str(request[1])
-							content='HTTP/1.1 200 OK\r\n'
-							content+='Content-Type: text/html; charset=UTF-8\r\n'
-							content+='Content-Length: '+sizestr+'\r\n\r\n'
+							content=headerWriter(len(contents),'text/html')
 							self.client.send(content)
-							print content
-							self.client.send(contents)
+							with open('TMGD.html','r') as file:
+								for line in file:
+									self.client.send(line)
 							self.client.close()
-							# print('after ', i)
 							break
 
 					else:
 						self.client.send('HTTP/1.1 404 Not Found\r\n\r\n')
 						self.client.close()
-						break	
+						break
 
 				else:
 					raise error('CLinet disconnected')
