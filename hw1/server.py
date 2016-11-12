@@ -6,6 +6,7 @@ import string
 import select
 import os
 
+#The server obj
 class Server:
 	def __init__(self,port):
 		self.host=''
@@ -35,6 +36,7 @@ class Server:
 
 		self.sock.close()
 
+#the function helps to write HTTP header
 def headerWriter(filesize,type):
 	sizestr=str(filesize)
 	header='HTTP/1.1 200 OK\r\n'
@@ -42,6 +44,7 @@ def headerWriter(filesize,type):
 	header+='Content-Length: '+sizestr+'\r\n\r\n'
 	return header
 
+#A thread for the server
 class ServerThread(threading.Thread):
 	def __init__(self,(client,address)):
 		threading.Thread.__init__(self)
@@ -83,17 +86,19 @@ class ServerThread(threading.Thread):
 								self.client.send('HTTP/1.1 404 Not Found\r\n')
 								self.client.close()
 								break
-						print 'root',root
-						print 'filetype',filetype
+						# print 'root',root
+						# print 'filetype',filetype
 						header=headerWriter(os.stat(root).st_size,filetype)
 						
 								
 						self.client.send(header)
-						with open(root,'rb') as file:
-							for line in file:
-								self.client.send(line)
-						self.client.close()
-						# break
+						file = open(root,'rb')
+						while True:
+							line=file.read(1024)	
+							self.client.send(line)
+							if not line:
+								self.client.close()
+								break
 
 					else:
 						self.client.send('HTTP/1.1 404 Not Found\r\n\r\n')
