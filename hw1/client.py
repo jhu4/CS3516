@@ -118,22 +118,23 @@ print '=============================================\n'
 
 #send HTTP/1.1 GET message to the host
 if path:
-	print path
-	message='GET '+'/'+path+' HTTP/1.1\r\n\r\n'
+	message='GET '+'/'+path+' HTTP/1.1\r\n'
 else:
-	message='GET / HTTP/1.1\r\n\r\n'
+	message='GET / HTTP/1.1\r\n'
+
+connection='Connection: close\r\n\r\n'
 
 if rttenable:
 	starttime=time.time()
 
 try:
 	#send request to the host
-	s.sendall(message)
+	s.send(message)
+	s.send(connection)
 except socket.error:
 	print 'Failed to send message to the server'
 	s.close()
 	sys.exit()
-
 
 
 while True:
@@ -143,12 +144,11 @@ while True:
 	else:
 		break 
 
-
-
 #if optional is made by the user...print the RTT time
 if rttenable:
+	print '============================================='
 	print 'RTT time: '+str(1000*(time.time()-starttime))+' milliseconds'
-	print '=============================================\n'
+	
 
 print data
 
