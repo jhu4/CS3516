@@ -76,7 +76,7 @@ if length==3:
 
 # there are specification, address and socket num
 elif length==4:
-	if sys.argv[1]=="-p":
+	if sys.argv[1]=="--ttl":
 		rttenable=True
 		add=sys.argv[2]
 		host,path=parsestring(add)
