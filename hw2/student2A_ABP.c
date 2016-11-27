@@ -20,16 +20,19 @@ void A_init() {
 void A_output(struct msg message) {
 	//put the message into the queue
 	enqueue(&A_queue,message);
+	printf("------------------------------A Queue front %s size %d\n",peek(&A_queue).data,A_queue.size);
 	
 	switch(global_Astate){
 		case WaitForCall0:
 			//send it immediatly
-			tolayer3(1,makepkt(0,0,message));
+			printf("------------------------------A send PKT0 %s\n",message.data);
+			tolayer3(0,*makepkt(0,0,message));
 			startTimer(0,WAIT_TIME);
 			A_changestate(WaitForACK0);
 			break;
 		case WaitForCall1:
-			tolayer3(1,makepkt(0,1,message));
+			printf("------------------------------A send PKT1 %s\n",message.data);
+			tolayer3(0,*makepkt(0,1,message));
 			startTimer(0,WAIT_TIME);
 			A_changestate(WaitForACK1);
 			break;
@@ -57,8 +60,10 @@ void A_input(struct pkt packet) {
 	switch(global_Astate){
 		case WaitForACK0:
 			if(!iscorrupted(packet) && packet.acknum==0){
-				stopTimer(0);
+				
+				printf("------------------------------A Receive ACK0\n");
 				//delete the pkt0 backup
+				printf("------------------------------A Dequeue %s\n",peek(&A_queue).data);
 				dequeue(&A_queue);
 				//if the queue now is empty, wait for call 1 from above
 				if(isEmpty(&A_queue)){
@@ -66,7 +71,9 @@ void A_input(struct pkt packet) {
 				}//if the queue has pkt
 				else{
 					//make a pkt1 and send it to B
-					tolayer3(1,makepkt(0,1,peek(&A_queue)));
+
+					printf("------------------------------A send PKT1 %s\n",peek(&A_queue).data);
+					tolayer3(0,*makepkt(0,1,peek(&A_queue)));
 					startTimer(0,WAIT_TIME);
 					A_changestate(WaitForACK1);
 				}
@@ -74,14 +81,17 @@ void A_input(struct pkt packet) {
 			break;
 		case WaitForACK1:
 			if(!iscorrupted(packet) && packet.acknum==1){
-				stopTimer(0);
+
+				printf("------------------------------A Receive ACK1 %s\n",peek(&A_queue).data);
 				//delete the pkt1 backup
 				dequeue(&A_queue);
 				if(isEmpty(&A_queue)){
 					A_changestate(WaitForCall0);
 				}
 				else{
-					tolayer3(1,makepkt(0,0,peek(&A_queue)));
+
+					printf("------------------------------A send PKT0\n");
+					tolayer3(0,*makepkt(0,0,peek(&A_queue)));
 					startTimer(0,WAIT_TIME);
 					A_changestate(WaitForACK0);
 				}
@@ -109,13 +119,15 @@ void A_timerinterrupt() {
 		case WaitForACK0:
 			stopTimer(0);
 			//resend pkt to B
-			tolayer3(1,makepkt(0,0,peek(&A_queue)));
+			printf("------------------------------A Resend PKT0\n");
+			tolayer3(0,*makepkt(0,0,peek(&A_queue)));
 			startTimer(0,WAIT_TIME);
 			break;
 		case WaitForACK1:
 			stopTimer(0);
 			//resend pkt to B
-			tolayer3(1,makepkt(0,0,peek(&A_queue)));
+			printf("------------------------------A Resend PKT1\n");
+			tolayer3(0,*makepkt(0,1,peek(&A_queue)));
 			startTimer(0,WAIT_TIME);
 			break;
 		case WaitForCall0:

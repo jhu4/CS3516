@@ -5,8 +5,8 @@ struct msg;
 struct pkt;
 
 //ABP------------------------------------------------------------------- 
-#define WAIT_TIME 13
-#define BUFFER_SIZE 10
+#define WAIT_TIME 25
+#define BUFFER_SIZE 30
 
 enum Astates{
 	WaitForCall0,
@@ -39,8 +39,9 @@ void B_changestate(enum Bstates state);
 
 int iscorrupted(struct pkt packet);
 int calculate_checksum(int acknum, int seqnum,char* data);
-struct pkt makepkt(int acknum, int seqnum,struct msg data);
+struct pkt* makepkt(int acknum, int seqnum,struct msg data);
 struct pkt makeACK(int acknum, int seqnum);
+struct msg makemsg(char* data);
 
 void initQueue(Queue* q);
 int isEmpty(Queue* q);
