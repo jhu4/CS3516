@@ -26,13 +26,13 @@ void A_output(struct msg message) {
 		case WaitForCall0:
 			//send it immediatly
 			printf("------------------------------A send PKT0 %s\n",message.data);
-			tolayer3(0,*makepkt(0,0,message));
+			tolayer3(0,makepkt(0,0,message));
 			startTimer(0,WAIT_TIME);
 			A_changestate(WaitForACK0);
 			break;
 		case WaitForCall1:
 			printf("------------------------------A send PKT1 %s\n",message.data);
-			tolayer3(0,*makepkt(0,1,message));
+			tolayer3(0,makepkt(0,1,message));
 			startTimer(0,WAIT_TIME);
 			A_changestate(WaitForACK1);
 			break;
@@ -73,7 +73,7 @@ void A_input(struct pkt packet) {
 					//make a pkt1 and send it to B
 
 					printf("------------------------------A send PKT1 %s\n",peek(&A_queue).data);
-					tolayer3(0,*makepkt(0,1,peek(&A_queue)));
+					tolayer3(0,makepkt(0,1,peek(&A_queue)));
 					startTimer(0,WAIT_TIME);
 					A_changestate(WaitForACK1);
 				}
@@ -90,8 +90,8 @@ void A_input(struct pkt packet) {
 				}
 				else{
 
-					printf("------------------------------A send PKT0\n");
-					tolayer3(0,*makepkt(0,0,peek(&A_queue)));
+					printf("------------------------------A send PKT0 %s\n",peek(&A_queue).data);
+					tolayer3(0,makepkt(0,0,peek(&A_queue)));
 					startTimer(0,WAIT_TIME);
 					A_changestate(WaitForACK0);
 				}
@@ -119,15 +119,15 @@ void A_timerinterrupt() {
 		case WaitForACK0:
 			stopTimer(0);
 			//resend pkt to B
-			printf("------------------------------A Resend PKT0\n");
-			tolayer3(0,*makepkt(0,0,peek(&A_queue)));
+			printf("------------------------------A Resend PKT0 %s\n",peek(&A_queue).data);
+			tolayer3(0,makepkt(0,0,peek(&A_queue)));
 			startTimer(0,WAIT_TIME);
 			break;
 		case WaitForACK1:
 			stopTimer(0);
 			//resend pkt to B
-			printf("------------------------------A Resend PKT1\n");
-			tolayer3(0,*makepkt(0,1,peek(&A_queue)));
+			printf("------------------------------A Resend PKT1 %s\n",peek(&A_queue).data);
+			tolayer3(0,makepkt(0,1,peek(&A_queue)));
 			startTimer(0,WAIT_TIME);
 			break;
 		case WaitForCall0:

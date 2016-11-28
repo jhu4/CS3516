@@ -21,14 +21,13 @@ int calculate_checksum(int acknum, int seqnum,char* data){
 }
 
 
-struct pkt* makepkt(int acknum, int seqnum,struct msg data){
+struct pkt makepkt(int acknum, int seqnum,struct msg data){
 	struct pkt* packet=malloc(sizeof(struct pkt));
 	packet->seqnum=seqnum;
     packet->acknum=acknum;
     packet->checksum=calculate_checksum(acknum,seqnum,data.data);
     strncpy(packet->payload,data.data,MESSAGE_LENGTH);
-    printf("Makepkt Payload: %s \n",packet->payload );
-    return packet;
+    return *packet;
 }
 
 struct pkt makeACK(int acknum, int seqnum){
@@ -98,7 +97,6 @@ void dequeue(Queue* q){
 }
 
 struct msg peek(Queue* q){
-	printf("Peek%s\n", (q->front)->data);
 	return *q->front;
 }
 //-----------------------------------------------------------

@@ -22,7 +22,7 @@ void B_input(struct pkt packet) {
 		case WaitForPkt0:
 			if(!iscorrupted(packet) && packet.seqnum==0){
 
-				printf("----------------------------------B Receive Seq0\n");
+				printf("----------------------------------B Receive Seq0 %s\n",packet.payload);
 				//send ACK0
 				tolayer3(1,makeACK(0,0));
 				printf("----------------------------------B Sent Ack0\n");
@@ -39,7 +39,7 @@ void B_input(struct pkt packet) {
 			break;
 		case WaitForPkt1:
 			if(!iscorrupted(packet) && packet.seqnum==1){
-				printf("----------------------------------B Receive Seq1\n");
+				printf("----------------------------------B Receive Seq1 %s\n",packet.payload);
 				tolayer3(1,makeACK(1,0));
 				printf("----------------------------------B Sent Ack1\n");
 				tolayer5(1,makemsg(packet.payload));
