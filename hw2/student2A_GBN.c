@@ -10,7 +10,6 @@ void A_init() {
 	A_base_seqnum=1;
 	A_next_seqnum=1;
  	A_total_seqnum=1;
- 	A_init_flag=0;
 }
 
 /* 
