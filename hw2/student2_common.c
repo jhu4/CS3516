@@ -4,13 +4,14 @@
 #include "student2_common.h"
 #include "project2.h"
 
-//state changing method, avoiding A or B to mess up with global state
-void A_changestate(enum Astates state){
-	global_Astate=state;
+int max(int a, int b){
+	if (a>b) return a;
+	return b;
 }
 
-void B_changestate(enum Bstates state){
-	global_Bstate=state;
+int min(int a,int b){
+	if(a<b) return a;
+	return b;
 }
 
 //see if a pkt is corrupted
@@ -69,6 +70,7 @@ void initQueue(Queue* q){
 	q->data= malloc(BUFFER_SIZE*sizeof(struct msg));
 	q->front=q->data;
 	q->next=q->data;
+	q->total=q->data;
 	q->size=0;
 }
 
@@ -89,13 +91,13 @@ void enqueue(Queue* q,struct msg data){
 
 	q->size++;
 
-	strncpy((q->next)->data,data.data,MESSAGE_LENGTH);
+	strncpy((q->total)->data,data.data,MESSAGE_LENGTH);
 
-	if(q->next==&q->data[BUFFER_SIZE]){
-		q->next=q->data;
+	if(q->total==&q->data[BUFFER_SIZE]){
+		q->total=q->data;
 	}
 	else{
-		q->next++;
+		q->total++;
 	}
 }
 
@@ -116,8 +118,39 @@ void dequeue(Queue* q){
 	}
 }
 
+
 //peek the front msg, usually use for resend
-struct msg peek(Queue* q){
-	return *q->front;
+//if index is 0, it means peek the most front one
+struct msg peek(Queue* q,int index){
+	int i;
+	struct msg* tmpptr=malloc(sizeof(struct msg));
+	tmpptr=q->front;
+
+
+	for(i=0;i<index;i++){
+		if(tmpptr==&q->data[BUFFER_SIZE]){
+			tmpptr=q->data;
+		}
+		else{
+			tmpptr++;
+		}
+	}
+
+	return *tmpptr;
+}
+
+
+struct msg shiftWindow(Queue* q){
+	struct msg* tmpptr=malloc(sizeof(struct msg));
+	tmpptr=q->next;
+
+	if(q->next==&q->data[BUFFER_SIZE]){
+		q->next=q->data;
+	}
+	else{
+		q->next++;
+	}
+
+	return *tmpptr;
 }
 //-----------------------------------------------------------

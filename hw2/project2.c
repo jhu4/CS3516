@@ -28,7 +28,6 @@ VERSIONS:
 2.31 - November 2013 - Version released to 3016 class.
 *****************************************************************************/
 #include <sys/time.h>
-
 #include "project2.h"
 #include <stdio.h>
 #include <stdlib.h>
