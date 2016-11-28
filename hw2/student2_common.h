@@ -5,7 +5,7 @@ struct msg;
 struct pkt;
 
 //ABP------------------------------------------------------------------- 
-#define WAIT_TIME 60
+#define WAIT_TIME 50
 #define BUFFER_SIZE 50
 
 enum Astates{
