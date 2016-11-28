@@ -22,37 +22,37 @@ void B_input(struct pkt packet) {
 		case WaitForPkt0:
 			if(!iscorrupted(packet) && packet.seqnum==0){
 
-				printf("----------------------------------B Receive Seq0 %s\n",packet.payload);
+				//printf("----------------------------------B Receive Seq0 %s\n",packet.payload);
 				//send ACK0
 				tolayer3(1,makeACK(0,0));
-				printf("----------------------------------B Sent Ack0\n");
+				//printf("----------------------------------B Sent Ack0\n");
 				//deliver data to layer5 of B
 				tolayer5(1,makemsg(packet.payload));
 				B_changestate(WaitForPkt1);
 			}
 			else if(!iscorrupted(packet) && packet.seqnum==1){
 
-				printf("----------------------------------B Receive Seq1 but expected 0\n");
+				//printf("----------------------------------B Receive Seq1 but expected 0\n");
 				tolayer3(1,makeACK(1,0));
 			}
 			//if is it corrupted, doing nothing
 			break;
 		case WaitForPkt1:
 			if(!iscorrupted(packet) && packet.seqnum==1){
-				printf("----------------------------------B Receive Seq1 %s\n",packet.payload);
+				//printf("----------------------------------B Receive Seq1 %s\n",packet.payload);
 				tolayer3(1,makeACK(1,0));
-				printf("----------------------------------B Sent Ack1\n");
+				//printf("----------------------------------B Sent Ack1\n");
 				tolayer5(1,makemsg(packet.payload));
 				B_changestate(WaitForPkt0);
 			}
 			else if(!iscorrupted(packet) && packet.seqnum==0){
 
-				printf("----------------------------------B Receive Seq0 but expected 1\n");
+				//printf("----------------------------------B Receive Seq0 but expected 1\n");
 				tolayer3(1,makeACK(0,0));
 			}
 			break;
 		default:
-			printf("student2B_APB.c B_input invalid state\n");
+			//printf("student2B_APB.c B_input invalid state\n");
 			break;
 	}
 }

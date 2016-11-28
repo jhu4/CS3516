@@ -31,11 +31,11 @@ typedef struct{
 //global state
 enum Bstates global_Bstate;
 enum Astates global_Astate;
+//msg Queue for A
 Queue A_queue;
 
 void A_changestate(enum Astates state);
 void B_changestate(enum Bstates state);
-
 
 int iscorrupted(struct pkt packet);
 int calculate_checksum(int acknum, int seqnum,char* data);
@@ -49,6 +49,5 @@ int isFull(Queue* q);
 void enqueue(Queue* q,struct msg data);
 void dequeue(Queue* q);
 struct msg peek(Queue* q);
-
 
 #endif

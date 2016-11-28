@@ -4,6 +4,7 @@
 #include "student2_common.h"
 #include "project2.h"
 
+//state changing method, avoiding A or B to mess up with global state
 void A_changestate(enum Astates state){
 	global_Astate=state;
 }
@@ -12,12 +13,14 @@ void B_changestate(enum Bstates state){
 	global_Bstate=state;
 }
 
+//see if a pkt is corrupted
 int iscorrupted(struct pkt packet){
 	int pktchecksum=calculate_checksum(packet.acknum,packet.seqnum,packet.payload);
 	// printf("----------------------calculated %d inner %d\n",pktchecksum,packet.checksum);
 	if(packet.checksum==pktchecksum) return FALSE;
 	return TRUE;
 }
+
 
 int calculate_checksum(int acknum, int seqnum,char* data){
 	int checksum=0;
@@ -33,7 +36,7 @@ int calculate_checksum(int acknum, int seqnum,char* data){
 	return checksum;
 }
 
-
+//make a normal pkt with data
 struct pkt makepkt(int acknum, int seqnum,struct msg data){
 	struct pkt* packet=malloc(sizeof(struct pkt));
 	packet->seqnum=seqnum;
@@ -43,6 +46,7 @@ struct pkt makepkt(int acknum, int seqnum,struct msg data){
     return *packet;
 }
 
+//make a ACK pkt
 struct pkt makeACK(int acknum, int seqnum){
 	char payload[20]="ACK";
 	struct pkt packet;
@@ -53,13 +57,14 @@ struct pkt makeACK(int acknum, int seqnum){
 	return packet;
 }
 
+//make a msg
 struct msg makemsg(char* data){
 	struct msg hi;
 	strncpy(hi.data,data,MESSAGE_LENGTH);
 	return hi;
 }
 
-//-----------------------------------------------------------Queue
+//-----------------------------------------------------------Queue functions
 void initQueue(Queue* q){
 	q->data= malloc(BUFFER_SIZE*sizeof(struct msg));
 	q->front=q->data;
@@ -75,6 +80,7 @@ int isFull(Queue* q){
 	return q->size==BUFFER_SIZE;
 }
 
+//put msg from layer 5 to a Queue buffer
 void enqueue(Queue* q,struct msg data){
 	if(isFull(q)){
 		printf("Queue is Full\n");
@@ -93,6 +99,7 @@ void enqueue(Queue* q,struct msg data){
 	}
 }
 
+//delete the front msg, usually is used when receive a proper ACK
 void dequeue(Queue* q){
 	if(isEmpty(q)){
 		printf("Queue is Empty\n");
@@ -109,6 +116,7 @@ void dequeue(Queue* q){
 	}
 }
 
+//peek the front msg, usually use for resend
 struct msg peek(Queue* q){
 	return *q->front;
 }
