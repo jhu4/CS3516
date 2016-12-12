@@ -4,33 +4,52 @@
 
 extern int TraceLevel;
 
-
 struct distance_table {
   int costs[MAX_NODES][MAX_NODES];
 };
 struct distance_table dt0;
 struct NeighborCosts   *neighbor0;
-
+void printdt0( int MyNodeNumber, struct NeighborCosts *neighbor, 
+		struct distance_table *dtptr );
 
 static int mynum = 0;
-
+static struct distance_table myversiontable;
 /* students to write the following two routines, and maybe some others */
 void rtinit0() {
 	int i,j;
+	//initialize my table
 	for(i=0;i<MAX_NODES;i++){
 		for(j=0;j<MAX_NODES;j++){
-			dt0.costs[i][j]=INFINITY;
+			if(i==j){
+				myversiontable.costs[i][j]=0;
+			}
+			else{
+				myversiontable.costs[i][j]=INFINITY;	
+			}
 		}
 	}
 	neighbor0=getNeighborCosts(0);
 	//initialize itself's costs to neighbors
 	for(i=0;i<MAX_NODES;i++){
-		dt0.costs[mynum][i]=neighbor0->NodeCosts[i];
+		myversiontable.costs[mynum][i]=neighbor0->NodeCosts[i];
 	}
+	//convert my version of table to the weird requested version of the table
+	for(i=0;i<MAX_NODES;i++){
+		for(j=0;j<MAX_NODES;j++){
+			if(neighbor0->NodeCosts[j]+myversiontable.costs[j][i]>=INFINITY){
+				dt0.costs[i][j]=INFINITY;
+		
+			}
+			else{
+				dt0.costs[i][j]=neighbor0->NodeCosts[j]+myversiontable.costs[j][i];
+			}
+		}
+	}
+	//informs neighbors
 	for(int i=0;i<MAX_NODES;i++){
 		//cannot be myself or node that is not my neighbor
 		if(i!=mynum && neighbor0->NodeCosts[i]<INFINITY){
-			toLayer2(*makepacket(mynum,i,&dt0.costs[mynum][0]));	
+			toLayer2(*makepacket(mynum,i,&myversiontable.costs[mynum][0]));	
 		}
 	}
 }
@@ -40,31 +59,44 @@ void rtupdate0( struct RoutePacket *rcvdpkt ) {
 	//just in case that this is actually a msg for me
 	if(rcvdpkt->destid==mynum){
 		//update the list for the sender node
-		int i;
+		int i,j;
 		int isChanged=NO;
 		for(i=0;i<MAX_NODES;i++){
-			dt0.costs[rcvdpkt->sourceid][i]=rcvdpkt->mincost[i];
+			myversiontable.costs[rcvdpkt->sourceid][i]=rcvdpkt->mincost[i];
 		}
 		//update itself's min distance to a node
 		for(i=0;i<4;i++){
-			int minToNodeI = smallest(dt0.costs[mynum][0]+dt0.costs[0][i]
-							,dt0.costs[mynum][1]+dt0.costs[1][i]
-							,dt0.costs[mynum][2]+dt0.costs[2][i]
-							,dt0.costs[mynum][3]+dt0.costs[3][i]);
+			int minToNodeI = smallest(myversiontable.costs[mynum][0]+myversiontable.costs[0][i]
+							,myversiontable.costs[mynum][1]+myversiontable.costs[1][i]
+							,myversiontable.costs[mynum][2]+myversiontable.costs[2][i]
+							,myversiontable.costs[mynum][3]+myversiontable.costs[3][i]);
 			//if the min value changed, flip the flag
-			if(dt0.costs[mynum][i]!=minToNodeI){
+			if(myversiontable.costs[mynum][i]!=minToNodeI){
 				isChanged=YES;
-				dt0.costs[mynum][i] = (minToNodeI<INFINITY?minToNodeI:INFINITY);
+				myversiontable.costs[mynum][i] = (minToNodeI<INFINITY?minToNodeI:INFINITY);
 			}
 		}
 		if(isChanged){
+			//convert my version of table to the weird requested version of the table
+			for(i=0;i<MAX_NODES;i++){
+				for(j=0;j<MAX_NODES;j++){
+					if(neighbor0->NodeCosts[j]+myversiontable.costs[j][i]>=INFINITY){
+						dt0.costs[i][j]=INFINITY;
+				
+					}
+					else{
+						dt0.costs[i][j]=neighbor0->NodeCosts[j]+myversiontable.costs[j][i];
+					}
+				}
+			}
 			//broadcast the changing news to its neighbor
 			for(int i=0;i<MAX_NODES;i++){
 				//cannot be myself or node that is not my neighbor
 				if(i!=mynum && neighbor0->NodeCosts[i]<INFINITY){
-					toLayer2(*makepacket(mynum,i,&dt0.costs[mynum][0]));	
+					toLayer2(*makepacket(mynum,i,&myversiontable.costs[mynum][0]));	
 				}
 			}
+			printdt0(0,neighbor0,&dt0);
 		}
 
 	}
