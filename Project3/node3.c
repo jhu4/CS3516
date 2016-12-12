@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "project3.h"
 #include "share.h"
 
@@ -77,18 +78,7 @@ void rtupdate3( struct RoutePacket *rcvdpkt ) {
 			}
 		}
 		if(isChanged){
-			//convert my version of table to the weird requested version of the table
-			for(i=0;i<MAX_NODES;i++){
-				for(j=0;j<MAX_NODES;j++){
-					if(neighbor3->NodeCosts[j]+myversiontable.costs[j][i]>=INFINITY){
-						dt3.costs[i][j]=INFINITY;
-				
-					}
-					else{
-						dt3.costs[i][j]=neighbor3->NodeCosts[j]+myversiontable.costs[j][i];
-					}
-				}
-			}
+			
 			//broadcast the changing news to its neighbor
 			for(int i=0;i<MAX_NODES;i++){
 				//cannot be myself or node that is not my neighbor
@@ -97,6 +87,18 @@ void rtupdate3( struct RoutePacket *rcvdpkt ) {
 				}
 			}
 			
+		}
+		//convert my version of table to the weird requested version of the table
+		for(i=0;i<MAX_NODES;i++){
+			for(j=0;j<MAX_NODES;j++){
+				if(neighbor3->NodeCosts[j]+myversiontable.costs[j][i]>=INFINITY){
+					dt3.costs[i][j]=INFINITY;
+			
+				}
+				else{
+					dt3.costs[i][j]=neighbor3->NodeCosts[j]+myversiontable.costs[j][i];
+				}
+			}
 		}
 		printdt3(3,neighbor3,&dt3);
 	}
