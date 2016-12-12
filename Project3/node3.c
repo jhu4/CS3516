@@ -96,9 +96,9 @@ void rtupdate3( struct RoutePacket *rcvdpkt ) {
 					toLayer2(*makepacket(mynum,i,&myversiontable.costs[mynum][0]));	
 				}
 			}
-			printdt3(3,neighbor3,&dt3);
+			
 		}
-
+		printdt3(3,neighbor3,&dt3);
 	}
 }
 
